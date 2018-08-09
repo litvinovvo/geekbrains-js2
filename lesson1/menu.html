@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="menu-container"></div>
+    <script>
+        function Container() {
+            this.id = "";
+            this.className = "";
+            this.htmlCode = "";
+        }
+        Container.prototype.render = function () {
+            return this.htmlCode;
+        }
+        Container.prototype.remove = function (removeSubmenu) {
+            // document.getElementById(this.id).remove();
+            if(removeSubmenu)this.isSubmenuRemoved = true;
+            else this.isRemoved = true;
+        }
+        function Menu(my_id, my_class, my_items,my_selector) {
+            Container.call(this);
+            this.id = my_id;
+            this.className = my_class;
+            this.items = my_items;
+            this.selector = my_selector || false;
+        }
+
+        Menu.prototype = Object.create(Container.prototype);
+        
+        Menu.prototype.constructor = Menu;
+
+
+
+        function MenuItem(my_href, my_name, my_id, my_submenu) {
+            Container.call(this);
+            this.className = "menu-item";
+            this.href = my_href;
+            this.name = my_name;
+            this.id = my_id;
+            this.submenu = my_submenu || false;  // menu item can have submenu
+            this.isRemoved = false;
+            this.isSubmenuRemoved = false;
+        }
+        MenuItem.prototype = Object.create(Container.prototype);
+        MenuItem.prototype.constructor = MenuItem;
+        MenuItem.prototype.render = function () {
+            var el = "";
+            if(!this.isRemoved) el+= `
+            <li id="${this.id}" class="${this.className}">
+                <a href="${this.href}">${this.name}</a>
+                ${this.submenu instanceof Menu && !this.isSubmenuRemoved ? this.submenu.render() : ''}
+            </li>`;
+            // if(this.submenu instanceof Menu) return `<li id="${this.id}" class="${this.className}"><a href="${this.href}">${this.name}</a>${this.submenu.render()}</li>`;
+            // else return `<li id="${this.id}" class="${this.className}"><a href="${this.href}">${this.name}</a></li>`;
+            return el;
+        }
+
+
+        Menu.prototype.render = function () {
+            var container = false;
+            if(this.selector && document.querySelector(this.selector))container = document.querySelector(this.selector);
+            
+            
+            var result = "<ul class='" + this.className + "' id='" + this.id + "'>";
+            for (var item in this.items) {
+                if (this.items[item] instanceof MenuItem) {
+                    result += this.items[item].render();
+                }
+            }
+            result += "</ul>";
+            
+            if(container) {
+                container.innerHTML = result;
+                // console.log(container,container.innerHtml)
+            } 
+            return result;
+        }
+        
+        //create submenus
+
+        var s_item1 = new MenuItem("/login/b2b/", "Для партнёров","b2b");
+        var s_item2 = new MenuItem("/login/b2c/", "Для клиентов","b2c");
+        var s_items = [];
+        s_items.push(s_item1);
+        s_items.push(s_item2);
+        var lSubmenu = new Menu("login_submenu","my_subclass",s_items);
+
+        var b_item1 = new MenuItem("/catalogue/pro/small/", "Малый бизнес","small");
+        var b_item2 = new MenuItem("/catalogue/pro/enterprise/", "Корпорации","enterprise");
+        var b_items = [];
+        b_items.push(b_item1);
+        b_items.push(b_item2);
+        var bSubmenu = new Menu("business_submenu","my_subclass",b_items);
+
+        var p_item1 = new MenuItem("/catalogue/entry/", "Начального уровня","entry");
+        var p_item2 = new MenuItem("/catalogue/pro/", "Для профессионалов","pro",bSubmenu);
+        var p_items = [];
+        p_items.push(p_item1);
+        p_items.push(p_item2);
+        var pSubmenu = new Menu("product_submenu","my_subclass",p_items);
+        
+        //create main menu
+        
+        var m_item1 = new MenuItem("/", "Главная","main");
+        var m_item2 = new MenuItem("/catalogue/", "Каталог","catalog",pSubmenu);
+        var m_item3 = new MenuItem("/gallery/", "Галерея","gallery");
+        var m_item4 = new MenuItem("/login/", "Вход","login",lSubmenu);
+        var m_items = [];
+        m_items.push(m_item1);
+        m_items.push(m_item2);
+        m_items.push(m_item3);
+        m_items.push(m_item4);
+        
+        var menu = new Menu("my_menu", "My_class", m_items,".menu-container");
+        menu.render();
+        
+
+
+        // addEventListener('DOMContentLoaded',()=>{
+           
+        // })
+        // container.innerHtml = menu.render();
+        //test remove menu item
+
+        setTimeout(()=> {
+            menu.items[1].remove("removeSubmenu");
+            console.log("b_item1 was removed from menu");    
+            menu.render();
+            console.log("menu was re rendered");   
+        },3000);
+
+    </script>
+    
+</body>
+
+</html>
