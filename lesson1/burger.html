@@ -1,0 +1,177 @@
+<!-- ** - маленький (50 рублей, 20 калорий);**
+- большой (100 рублей, 40 калорий).
+Гамбургер может быть с одним из нескольких видов начинок (обязательно):
+** - сыром (+ 10 рублей, + 20 калорий);**
+** - салатом (+ 20 рублей, + 5 калорий);**
+- картофелем (+ 15 рублей, + 10 калорий).
+
+*Дополнительно, гамбургер можно посыпать приправой (+ 15 рублей, 0 калорий) и полить майонезом (+ 20 рублей, + 5 калорий). *
+
+Напишите программу, рассчитывающую стоимость и калорийность гамбургера. Используйте ООП подход (подсказка: нужен класс Гамбургер, константы, методы для выбора опций и расчета нужных величин). -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    
+</body>
+</html>
+<script>
+
+/**
+ * Представляет информацию об ошибке в ходе работы с гамбургером. 
+ * Подробности хранятся в свойстве message.
+ * @constructor 
+ */
+// function HamburgerException () { }
+
+function HamburgerException(message) {
+  Error.call(this, message) ;
+  this.name = "HamburgerException";
+
+  this.message = message;
+
+  if (Error.captureStackTrace) {
+    Error.captureStackTrace(this, HamburgerException);
+  } else {
+    this.stack = (new Error()).stack;
+  }
+
+}
+
+HamburgerException.prototype = Object.create(Error.prototype);    
+/**
+* Класс, объекты которого описывают параметры гамбургера. 
+* 
+* @constructor
+* @param size        Размер
+* @param stuffing    Начинка
+* @throws {HamburgerException}  При неправильном использовании
+*/
+function Hamburger(size, stuffing) { 
+    try{
+        if(!Hamburger.hasOwnProperty(size))throw new HamburgerException('no such size')
+        if(!Hamburger.hasOwnProperty(stuffing))throw new HamburgerException('no such stuffing')
+        this.size = Hamburger[size];
+        this.stuffing = Hamburger[stuffing];
+        this.toppings = [];
+    } catch (err) {
+        if (err instanceof HamburgerException) {
+            console.error('error when create a new burger:',err.message);
+            return {error: null};
+        } else {
+            throw err
+        } 
+    }
+
+
+} 
+/* Размеры, виды начинок и добавок */
+Hamburger.SIZE_SMALL = {name: 'small',price: 50, cal: 20};
+Hamburger.SIZE_LARGE = {name: 'large',price: 100, cal: 40};
+Hamburger.STUFFING_CHEESE = {name: 'cheese',price: 10, cal: 20};
+Hamburger.STUFFING_SALAD = {name: 'salad',price: 20, cal: 5};
+Hamburger.STUFFING_POTATO = {name: 'potato',price: 15, cal: 10};
+Hamburger.TOPPING_MAYO = {name: 'mayo',price: 20, cal: 5};
+Hamburger.TOPPING_SPICE = {name: 'spice',price: 15, cal: 0};
+/**
+* Добавить добавку к гамбургеру. Можно добавить несколько
+* добавок, при условии, что они разные.
+* 
+* @param topping     Тип добавки
+* @throws {HamburgerException}  При неправильном использовании
+*/
+Hamburger.prototype.addTopping = function (topping) {
+
+    try{
+        if(!Hamburger.hasOwnProperty(topping))throw new HamburgerException('no such topping')
+
+        if(this.toppings.filter((t)=>t.name === Hamburger[topping].name).length > 0) {
+            throw new HamburgerException('already have this topping')
+        }
+        this.toppings.push(Hamburger[topping]);
+    } catch (err){
+        if (err instanceof HamburgerException) {
+            console.error('error when add a new toping:',err.message);
+            return
+        } else {
+            throw err
+        }        
+    }
+}
+/**
+ * Убрать добавку, при условии, что она ранее была 
+ * добавлена.
+ * 
+ * @param topping   Тип добавки
+ * @throws {HamburgerException}  При неправильном использовании
+ */
+Hamburger.prototype.removeTopping = function (topping) {
+    try {
+        if(!Hamburger.hasOwnProperty(topping))throw new HamburgerException('no such topping');
+        
+        const filteredToppings = this.toppings.filter((t)=>t.name !== Hamburger[topping].name);
+        if(this.toppings.length > filteredToppings.length) {
+            // console.log('remove topping');
+            this.toppings = filteredToppings;
+            // return;
+        } else {
+            throw new HamburgerException('no such topping')
+        }
+    } catch (err){
+        if (err instanceof HamburgerException) {
+            console.error('error when remove toping:',err.message);
+            return
+        } else {
+            throw err
+        }         
+    }
+
+    // this.toppings.push(Hamburger[topping]);    
+}
+/**
+ * Получить список добавок.
+ *
+ * @return {Array} Массив добавленных добавок, содержит константы
+ *                 Hamburger.TOPPING_*
+ */
+Hamburger.prototype.getToppings = function () {
+    return this.toppings.map((t)=>t.name);
+}
+/**
+ * Узнать размер гамбургера
+ */
+Hamburger.prototype.getSize = function () {
+    return this.size.name;
+}
+/**
+ * Узнать начинку гамбургера
+ */
+Hamburger.prototype.getStuffing = function () {
+    return this.stuffing.name;
+}
+/**
+ * Узнать цену гамбургера
+ * @return {Number} Цена в тугриках
+ */
+Hamburger.prototype.calculatePrice = function () {
+    return this.size.price + this.stuffing.price + this.toppings.reduce((s,t)=>s+=t.price,0);
+}
+
+/**
+ * Узнать калорийность
+ * @return {Number} Калорийность в калориях
+ */
+Hamburger.prototype.calculateCalories = function () {
+    return this.size.cal + this.stuffing.cal + this.toppings.reduce((s,t)=>s+=t.cal,0);
+}
+
+
+const potatoBurger = new Hamburger('SIZE_LARGE','STUFFING_POTATO');
+console.log(potatoBurger);
+</script>
