@@ -14,127 +14,84 @@
         function Container() {
             this.id = "";
             this.className = "";
-            this.htmlCode = "";
+            this.element = "";
         }
         Container.prototype.render = function () {
-            return this.htmlCode;
+            return this.element;
         }
-        Container.prototype.remove = function (removeSubmenu) {
-            // document.getElementById(this.id).remove();
-            if(removeSubmenu)this.isSubmenuRemoved = true;
-            else this.isRemoved = true;
+        Container.prototype.remove = function () {
+            this.element.remove();
         }
-        function Menu(my_id, my_class, my_items,my_selector) {
+        function Menu(my_id, my_class, my_selector) {
             Container.call(this);
             this.id = my_id;
             this.className = my_class;
-            this.items = my_items;
-            this.selector = my_selector || false;
+            this.items = [];
+            this.container = document.querySelector(my_selector) || false;
         }
 
         Menu.prototype = Object.create(Container.prototype);
-        
         Menu.prototype.constructor = Menu;
+        Menu.prototype.add = function(item){
+            this.items.push(item);
+            if(this.element)this.element.appendChild(item.render())
 
+        }
+        Menu.prototype.render = function () {
+            const ulEl = document.createElement('ul');
+            ulEl.id = this.id;
+            ulEl.classList.add(this.className);
+            for(item in this.items){
+                ulEl.appendChild(this.items[item].render())
+            }
 
+            if(this.container)this.container.appendChild(ulEl);
+            this.element = ulEl;
+            return ulEl;
 
-        function MenuItem(my_href, my_name, my_id, my_submenu) {
+        }
+
+        function MenuItem(my_href, my_name, my_submenu) {
             Container.call(this);
             this.className = "menu-item";
             this.href = my_href;
             this.name = my_name;
-            this.id = my_id;
-            this.submenu = my_submenu || false;  // menu item can have submenu
-            this.isRemoved = false;
-            this.isSubmenuRemoved = false;
+            this.submenu = my_submenu ? my_submenu.render() : false;  // menu item can have submenu
         }
         MenuItem.prototype = Object.create(Container.prototype);
         MenuItem.prototype.constructor = MenuItem;
+        MenuItem.prototype.add = function(submenu){
+            this.submenu = submenu.render();
+            this.element.appendChild(this.submenu);
+        }        
         MenuItem.prototype.render = function () {
-            var el = "";
-            if(!this.isRemoved) el+= `
-            <li id="${this.id}" class="${this.className}">
-                <a href="${this.href}">${this.name}</a>
-                ${this.submenu instanceof Menu && !this.isSubmenuRemoved ? this.submenu.render() : ''}
-            </li>`;
-            // if(this.submenu instanceof Menu) return `<li id="${this.id}" class="${this.className}"><a href="${this.href}">${this.name}</a>${this.submenu.render()}</li>`;
-            // else return `<li id="${this.id}" class="${this.className}"><a href="${this.href}">${this.name}</a></li>`;
-            return el;
+            const liEl = document.createElement('li');
+            const aEl = document.createElement('a');
+            liEl.classList.add(this.className);
+            aEl.href = this.href;
+            aEl.innerText = this.name;
+            liEl.appendChild(aEl);
+            this.element = liEl;
+            if(this.submenu)this.element.appendChild(this.submenu)
+            return this.element;
+
         }
 
 
-        Menu.prototype.render = function () {
-            var container = false;
-            if(this.selector && document.querySelector(this.selector))container = document.querySelector(this.selector);
-            
-            
-            var result = "<ul class='" + this.className + "' id='" + this.id + "'>";
-            for (var item in this.items) {
-                if (this.items[item] instanceof MenuItem) {
-                    result += this.items[item].render();
-                }
-            }
-            result += "</ul>";
-            
-            if(container) {
-                container.innerHTML = result;
-                // console.log(container,container.innerHtml)
-            } 
-            return result;
-        }
-        
-        //create submenus
 
-        var s_item1 = new MenuItem("/login/b2b/", "Для партнёров","b2b");
-        var s_item2 = new MenuItem("/login/b2c/", "Для клиентов","b2c");
-        var s_items = [];
-        s_items.push(s_item1);
-        s_items.push(s_item2);
-        var lSubmenu = new Menu("login_submenu","my_subclass",s_items);
+        const submenu2 = new Menu('submenu2','submenu2');
+        submenu2.add(new MenuItem('/gal/1','gal'));
+        submenu2.add(new MenuItem('/gal/2','gal'));
 
-        var b_item1 = new MenuItem("/catalogue/pro/small/", "Малый бизнес","small");
-        var b_item2 = new MenuItem("/catalogue/pro/enterprise/", "Корпорации","enterprise");
-        var b_items = [];
-        b_items.push(b_item1);
-        b_items.push(b_item2);
-        var bSubmenu = new Menu("business_submenu","my_subclass",b_items);
+        const submenu1 = new Menu('submenu1','submenu1');
+        submenu1.add(new MenuItem('/cat/1','type1',submenu2));
+        submenu1.add(new MenuItem('/cat/2','type2'));
 
-        var p_item1 = new MenuItem("/catalogue/entry/", "Начального уровня","entry");
-        var p_item2 = new MenuItem("/catalogue/pro/", "Для профессионалов","pro",bSubmenu);
-        var p_items = [];
-        p_items.push(p_item1);
-        p_items.push(p_item2);
-        var pSubmenu = new Menu("product_submenu","my_subclass",p_items);
-        
-        //create main menu
-        
-        var m_item1 = new MenuItem("/", "Главная","main");
-        var m_item2 = new MenuItem("/catalogue/", "Каталог","catalog",pSubmenu);
-        var m_item3 = new MenuItem("/gallery/", "Галерея","gallery");
-        var m_item4 = new MenuItem("/login/", "Вход","login",lSubmenu);
-        var m_items = [];
-        m_items.push(m_item1);
-        m_items.push(m_item2);
-        m_items.push(m_item3);
-        m_items.push(m_item4);
-        
-        var menu = new Menu("my_menu", "My_class", m_items,".menu-container");
+        const menu =  new Menu('menu','menu','.menu-container');
+        menu.add(new MenuItem("/home",'home'));
+        menu.add(new MenuItem("/catalog",'catalog',submenu1));
+        menu.add(new MenuItem("/about",'about'));
         menu.render();
-        
-
-
-        // addEventListener('DOMContentLoaded',()=>{
-           
-        // })
-        // container.innerHtml = menu.render();
-        //test remove menu item
-
-        setTimeout(()=> {
-            menu.items[1].remove("removeSubmenu");
-            console.log("b_item1 was removed from menu");    
-            menu.render();
-            console.log("menu was re rendered");   
-        },3000);
 
     </script>
     
