@@ -43,21 +43,25 @@
             console.log(this)
             const self = this;
             ajax.open('GET',url);
+
             ajax.onreadystatechange = function(){
                 if(ajax.readyState !== 4)return;
                 if(ajax.status !== 200){
-                    console.error(ajax.status,ajax.statusText);
+                    console.error("error when loding data")
+                    self.loadStatus = "error";
+                    self.render();
+                    // console.error(ajax.status,ajax.statusText);
+
                 }else{
                     console.log(ajax.responseText);
                     self.items = JSON.parse(ajax.responseText).items
                     self.loadStatus = JSON.parse(ajax.responseText).result
                     // console.log(self.items)
                     self.render()
-
-
                 }
             }
             ajax.send();
+
         }
         Gallery.prototype.render = function(){
             if(this.loadStatus === "error" && this.container){
