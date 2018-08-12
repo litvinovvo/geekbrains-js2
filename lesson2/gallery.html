@@ -14,7 +14,7 @@
                 align-content: center;
                 font-family: Arial, Helvetica, sans-serif;
             }
-            .gallery__fail{
+            .gallery_fail{
                 display: block;
                 text-align: center;
             }
@@ -31,7 +31,7 @@
 </head>
 <body>
     <div class="gallery"></div>
-    <div class="gallery gallery-fail"></div>
+    <div class="gallery gallery_fail"></div>
     <script>
     const Gallery = (function(){
         function Gallery(params){
@@ -94,7 +94,7 @@
         loadFromUrl: "https://litvinovvo.github.io/geekbrains-js2/lesson2/gallery.json"
     })
     const galleryFail = new Gallery({
-        container: ".gallery-fail",
+        container: ".gallery_fail",
         loadFromUrl: "https://litvinovvo.github.io/geekbrains-js2/lesson2/gallery_fail.json"
     })
     // console.log(gallery.items) gallery-fail
