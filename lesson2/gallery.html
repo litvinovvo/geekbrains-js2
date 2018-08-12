@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+            .gallery{
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                align-items: center;
+                align-content: center;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+            .gallery__item{
+                flex: 1 1 350px;
+                font-size: 0;
+            }
+            .gallery__img{
+                width: 100%;
+                height: 300px;
+                object-fit: cover;
+            }
+            </style>    
+</head>
+<body>
+    <div class="gallery"></div>
+    <div class="gallery gallery-fail"></div>
+    <script>
+    const Gallery = (function(){
+        function Gallery(params){
+            this.items = [];
+            this.loadStatus = "unload";
+            if(params.loadFromUrl)this.items = this.loadGallery(params.loadFromUrl);
+            if(params.container && document.querySelector(params.container))this.container = document.querySelector(params.container);
+            else this.container = null;
+            // this.render()
+        }
+        Gallery.prototype.loadGallery = function (url){
+            const ajax = new XMLHttpRequest();
+            console.log(this)
+            const self = this;
+            ajax.open('GET',url);
+            ajax.onreadystatechange = function(){
+                if(ajax.readyState !== 4)return;
+                if(ajax.status !== 200){
+                    console.error(ajax.status,ajax.statusText);
+                }else{
+                    console.log(ajax.responseText);
+                    self.items = JSON.parse(ajax.responseText).items
+                    self.loadStatus = JSON.parse(ajax.responseText).result
+                    // console.log(self.items)
+                    self.render()
+
+
+                }
+            }
+            ajax.send();
+        }
+        Gallery.prototype.render = function(){
+            if(this.loadStatus === "error" && this.container){
+                this.container.innerHTML = "<h1>Ошибка при загрузке данных в галерее</h1><p>Попробуйте обновить страницу</p>";
+            }
+            if(this.container && this.loadStatus === "success"){
+                this.container.innerHTML = "";
+                for(i in this.items){
+                    const imgEl = document.createElement('img');
+                    const aEl = document.createElement('a');
+                    aEl.href = this.items[i].src;
+                    aEl.setAttribute("target", "_blank");
+                    aEl.className = "gallery__item";
+                    imgEl.className = "gallery__img"
+                    imgEl.src = this.items[i].src_pre;
+                    imgEl.alt = this.items[i].alt;
+                    aEl.appendChild(imgEl);
+                    this.container.appendChild(aEl);
+                }
+            }
+        }
+        return Gallery
+    }())
+    const gallery = new Gallery({
+        container: ".gallery",
+        loadFromUrl: "http://localhost:3000/gallery"
+    })
+    const galleryFail = new Gallery({
+        container: ".gallery-fail",
+        loadFromUrl: "http://localhost:3000/gallery-fail"
+    })
+    // console.log(gallery.items) gallery-fail
+    </script>
+</body>
+</html>

@@ -12,7 +12,7 @@
     <div class="menu-container"></div>
     <div class="menu-container2"></div>
     <script>
-        const Menu = (function(){
+        const Menu = (function () {
             function Container() {
                 this.id = "";
                 this.className = "";
@@ -24,30 +24,31 @@
             Container.prototype.remove = function () {
                 this.element.remove();
             }
+
             function Menu(params) {
                 Container.call(this);
                 this.id = params.id;
                 this.className = params.class;
                 this.items = [];
-                
+
             }
 
             Menu.prototype = Object.create(Container.prototype);
             Menu.prototype.constructor = Menu;
-            Menu.prototype.add = function(item){
+            Menu.prototype.add = function (item) {
                 this.items.push(item);
-                if(this.element)this.element.appendChild(item.render())
+                if (this.element) this.element.appendChild(item.render())
 
             }
             Menu.prototype.render = function (container) {
                 const ulEl = document.createElement('ul');
                 ulEl.id = this.id;
                 ulEl.classList.add(this.className);
-                for(item in this.items){
+                for (item in this.items) {
                     ulEl.appendChild(this.items[item].render())
                 }
 
-                if(container && document.querySelector(container)){
+                if (container && document.querySelector(container)) {
                     const containerEl = document.querySelector(container);
                     containerEl.innerHTML = '';
                     containerEl.appendChild(ulEl);
@@ -62,15 +63,15 @@
                 this.className = "menu-item";
                 this.href = my_href;
                 this.name = my_name;
-                this.submenu = my_submenu ? my_submenu : false;  // menu item can have submenu
+                this.submenu = my_submenu ? my_submenu : false; // menu item can have submenu
             }
             MenuItem.prototype = Object.create(Container.prototype);
             MenuItem.prototype.constructor = MenuItem;
-            MenuItem.prototype.add = function(submenu){
-                if(this.submenu)this.submenu.remove();
+            MenuItem.prototype.add = function (submenu) {
+                if (this.submenu) this.submenu.remove();
                 this.submenu = submenu.render();
                 this.element.appendChild(this.submenu);
-            }        
+            }
             MenuItem.prototype.render = function () {
                 const liEl = document.createElement('li');
                 const aEl = document.createElement('a');
@@ -79,44 +80,47 @@
                 aEl.innerText = this.name;
                 liEl.appendChild(aEl);
                 this.element = liEl;
-                if(this.submenu)liEl.appendChild(this.submenu.render())
+                if (this.submenu) liEl.appendChild(this.submenu.render())
                 return liEl;
 
             }
-            
-            generateMenuItems = function (menu,items){
-                for(i in items){
-                    if(items[i].submenu){
-                        menu.add(new MenuItem(items[i].href,items[i].text,generateMenu(items[i].submenu)));
+
+            generateMenuItems = function (menu, items) {
+                for (i in items) {
+                    if (items[i].submenu) {
+                        menu.add(new MenuItem(items[i].href, items[i].text, generateMenu(items[i].submenu)));
                     } else {
-                        menu.add(new MenuItem(items[i].href,items[i].text));
+                        menu.add(new MenuItem(items[i].href, items[i].text));
                     }
                 }
             }
-            generateMenu = function(obj){
+            generateMenu = function (obj) {
                 const menu = new Menu({
-                    id: obj.id, 
+                    id: obj.id,
                     class: obj.class
                 });
-                generateMenuItems(menu,obj.items);
+                generateMenuItems(menu, obj.items);
                 return menu;
             }
 
-            Menu.generateFromObj = function(params){
+            Menu.generateFromObj = function (params) {
                 // console.log(params.container)
                 const menu = generateMenu(params.generateFromObj);
 
-                if(params.container)menu.render(params.container);
+                if (params.container) menu.render(params.container);
                 return menu
             }
-            
-            Menu.generateFromUrl = function(params){
-                return fetch(params.generateFromUrl).then((response)=>response.json()).then((menuObj)=>{
+
+            Menu.generateFromUrl = function (params) {
+                return fetch(params.generateFromUrl).then((response) => response.json()).then((menuObj) => {
                     // console.log(params.container,params)
-                    this.generateFromObj({generateFromObj: menuObj,container: params.container});
+                    this.generateFromObj({
+                        generateFromObj: menuObj,
+                        container: params.container
+                    });
 
                     // console.log('return obj',menuObj);
-                }).catch((error)=>{
+                }).catch((error) => {
                     console.error(error.message);
                 })
                 // return {};
@@ -141,67 +145,59 @@
         // mainMenu.add(new menu.MenuItem("/about",'about'));
         // mainMenu.render('.menu-container');        
 
-        
-        const menuObj = {
-            id: 'menu',
-            class: 'menu',
-            items: [
-                {
-                    href: '/home',
-                    text: 'one'
-                },
-                {
-                    href: '/catalog',
-                    text: 'two',
-                    submenu: {
-                        id: 'submenu1',
-                        class: 'submenu',
-                        items: [
-                            {
-                                href: '/cat1',
-                                text: 'category 1',
-                                submenu: {
-                                    id: 'submenu2',
-                                    class: 'submenu',
-                                    items: [
-                                        {
-                                            href: '/subcat1',
-                                            text: 'subcategory 1'
-                                        },
-                                        {
-                                            href: '/subcat2',
-                                            text: 'subcategory 2'
-                                        }
-                                    ]
-                                }
-                            },
-                            {
-                                hef: '/cat2',
-                                text: 'category 2'
-                            }
-                        ]
-                    }
-                },
-                {
-                    href: '/about',
-                    text: 'three'
-                }
-            ]
 
-        } 
+        const menuObj = {
+            "id": "menu",
+            "class": "menu",
+            "items": [{
+                "href": "/home",
+                "text": "home"
+            }, {
+                "href": "/catalog",
+                "text": "catalog",
+                "submenu": {
+                    "id": "submenu1",
+                    "class": "submenu",
+                    "items": [{
+                        "href": "/catalog/sale",
+                        "text": "category 1",
+                        "submenu": {
+                            "id": "submenu2",
+                            "class": "submenu",
+                            "items": [{
+                                "href": "/catalog/electronic",
+                                "text": "electronic"
+                            }, {
+                                "href": "/catalog/wear",
+                                "text": "wear"
+                            }]
+                        }
+                    }, {
+                        "hef": "/catalog/hot",
+                        "text": "hot"
+                    }]
+                }
+            }, {
+                "href": "/about",
+                "text": "about"
+            }, {
+                "href": "/profile",
+                "text": "login"
+            }]
+        }
 
         const mainMenu = Menu.generateFromUrl({
-            generateFromUrl: 'http://localhost:3000/menu',
+            generateFromUrl: 'https://litvinovvo.github.io/geekbrains-js2/lesson1/menu.json',
             container: '.menu-container'
         })
 
         const secondaryMenu = Menu.generateFromObj({
             generateFromObj: menuObj,
             // container: '.menu-container2'
-        })        
+        })
         secondaryMenu.render('.menu-container2');
-        
-        
+
+
         // mainMenu.render('.menu-container')
         // console.log(menuObj)
         // menu.loadMenu('http://localhost:3000/menu')
@@ -212,11 +208,8 @@
         //     })
         //     .catch((error)=>console.error(error.message))
         // console.log(loadedObj)
-
-        
-
     </script>
-    
+
 </body>
 
 </html>
